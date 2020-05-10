@@ -1,24 +1,34 @@
 # c3pro
 
-## Project setup
+## プロジェクト初期化
 ```
 npm install
 ```
 
-### Compiles and hot-reloads for development
+### プロジェクト起動
 ```
 npm run serve
 ```
 
-### Compiles and minifies for production
-```
-npm run build
-```
+### 概要
+App.vueに各グラフのコンポーネントが記載されています。  
+コンポーネントと各ボードの紐づけは下記になっています。  
 
-### Lints and fixes files
-```
-npm run lint
-```
+|  コンポーネント  |  ボード  |
+| ---- | ---- |
+|  Sales  |  今年度売上  |
+|  SeasonalSales  |  季節ごとの売上変化  |
+|  PurchasesCountry  |  国ごとの購入数  |
+|  PriceAndSales  |  単価と売上  |
+|  SoldAndSales  |  商品ごとの販売数及び売上  |
+|  SalesTransition  |  商品ごとの売り上げ推移  |
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+### 現在の実装状況
+|  コンポーネント  |  進捗  |
+| ---- | ---- |
+|  Sales  |  0%  |
+|  SeasonalSales  |  20%  |
+|  PurchasesCountry  |  20%  |
+|  PriceAndSales  |  0%  |
+|  SoldAndSales  |  0%  |
+|  SalesTransition  |  0%  |

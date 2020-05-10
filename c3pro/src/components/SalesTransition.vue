@@ -14,14 +14,15 @@ import VueC3 from "vue-c3";
 // CSS を読み込む
 import "c3/c3.min.css";
 
+// 商品ごとの売り上げ推移
 export default {
-  name: "demo",
+  name: "SalesTransition",
   components: {
     VueC3
   },
   // htmlがコンポーネントが参照するプロパティ
   data: () => ({
-    handler: new Vue(),
+    handler: new Vue()
   }),
   props: ["chartType", "chartData", "emphasizeDataName", "xTicks"],
   computed: {
@@ -31,7 +32,7 @@ export default {
       return {
         // 主としてデータ
         data: {
-          type: this.chartType,
+          type: "line",
           columns: this.chartData,
           // columns: [
           //   // 配列一つ目が、データの名前になる
@@ -40,7 +41,7 @@ export default {
           // ]
           // selection: {
           //   enabled: true
-          // },        
+          // },
           onclick: (d, element) => {
             // console.log(d);
             // console.log(element);
@@ -98,13 +99,13 @@ export default {
   methods: {
     onPlotClick: function(d) {
       // 選択されたプロットのデータ名を親へ通知する
-      this.$emit('emphasize', d.name);
+      this.$emit("emphasize", d.name);
     }
   },
   watch: {
     // 親から渡された値が更新されたときに呼び出される
     emphasizeDataName: function(newVal) {
-      this.handler.$emit('dispatch', (chart) => chart.focus(newVal));
+      this.handler.$emit("dispatch", chart => chart.focus(newVal));
     }
   }
 };
