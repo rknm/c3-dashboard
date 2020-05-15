@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div class="container">
     <!-- <img alt="Vue logo" src="./assets/logo.png"> -->
     <!-- <chart
       v-for="type in chartTypeList"
@@ -32,6 +32,8 @@ import Prices from "./components/PriceAndSales";
 import SoldAndSales from "./components/SoldAndSales";
 // 商品ごとの売り上げ推移
 import Transition from "./components/SalesTransition";
+// CSV解析ライブラリ
+const papa = require("papaparse");
 
 export default {
   name: "App",
@@ -55,7 +57,8 @@ export default {
       ["ダミー", 506546, 508398, 509904, 511082, 511702, 521556]
     ],
     xTicks: ["H25", "H26", "H27", "H28", "H29", "H30"],
-    emphasizeDataName: ""
+    emphasizeDataName: "",
+    parsedCSV: []
   }),
   mounted() {
     // TODO データをサーバから取得する
@@ -66,6 +69,10 @@ export default {
     //   .get('https://www.google.com/')
     //   .then(() => this.chartData.push(["x", 0, 20, 10, 40, 15, 500], ["y", 30, 200, 100, 400, 150, 250]))
     //   .catch(() => this.chartData.push(["x", 0, 20, 10, 40, 15, 500], ["y", 30, 200, 100, 400, 150, 250]))
+    this.parsedCSV = papa.parse("../Online_Retail_clipping.csv", {
+      header: true
+    });
+    console.log(this.parsedCSV);
   },
   methods: {
     emphasize(name) {
@@ -82,12 +89,8 @@ export default {
 </script>
 
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+.container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(800px, 1fr));
 }
 </style>

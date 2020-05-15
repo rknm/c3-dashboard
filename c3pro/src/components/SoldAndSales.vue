@@ -1,6 +1,9 @@
 <template>
-  <div>
-    <vue-c3 :handler="handler"></vue-c3>
+  <div class="table-container">
+    <div class="cell">1</div>
+    <div class="cell">2</div>
+    <div class="cell">3</div>
+    <div class="cell">4</div>
   </div>
 </template>
 
@@ -8,18 +11,12 @@
 // hander のために必要
 import Vue from "vue";
 
-// メインのコンポーネント
-import VueC3 from "vue-c3";
-
 // CSS を読み込む
 import "c3/c3.min.css";
 
 // 国ごとの販売数及び売り上げ
 export default {
   name: "SoldAndSales",
-  components: {
-    VueC3
-  },
   // htmlがコンポーネントが参照するプロパティ
   data: () => ({
     handler: new Vue()
@@ -112,12 +109,16 @@ export default {
 };
 </script>
 <style scoped>
-.button-wrapper {
-  text-align: center;
+.table-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding-bottom: 10p;
+  height: 100px;
 }
 
-button {
-  padding: 10px;
-  background: red;
+.cell {
+  border: solid 1px #ddd;
+  display: flex;
+  text-align: center;
 }
 </style>
