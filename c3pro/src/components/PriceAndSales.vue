@@ -24,7 +24,7 @@ export default {
   data: () => ({
     handler: new Vue()
   }),
-  props: ["chartType", "chartData", "emphasizeDataName", "xTicks"],
+  props: ["parsedData"],
   computed: {
     // c3 のオプションに渡す値
     // ここでC3特有の値を渡す

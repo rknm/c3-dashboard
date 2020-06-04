@@ -1,9 +1,9 @@
 <template>
   <div class="table-container">
-    <div class="cell">1</div>
-    <div class="cell">2</div>
-    <div class="cell">3</div>
-    <div class="cell">4</div>
+    <div class="cell header">オーダー数</div>
+    <div class="cell header">売上</div>
+    <div class="cell">{{parsedData.length}}</div>
+    <div class="cell">{{0}}</div>
   </div>
 </template>
 
@@ -19,75 +19,24 @@ export default {
   name: "SoldAndSales",
   // htmlがコンポーネントが参照するプロパティ
   data: () => ({
-    handler: new Vue()
+    handler: new Vue(),
+    sales: 0
   }),
-  props: ["chartType", "chartData", "emphasizeDataName", "xTicks"],
+  props: ["parsedData"],
   computed: {
-    // c3 のオプションに渡す値
-    // ここでC3特有の値を渡す
-    options() {
-      return {
-        // 主としてデータ
-        data: {
-          // 棒グラフ
-          type: "bar",
-          columns: this.chartData,
-          // columns: [
-          //   // 配列一つ目が、データの名前になる
-          //   ["x", 0, 20, 10, 40, 15, this.val],
-          //   ["y", 30, 200, 100, 400, 150, 250]
-          // ]
-          // selection: {
-          //   enabled: true
-          // },
-          onclick: (d, element) => {
-            // console.log(d);
-            // console.log(element);
-            this.onPlotClick(d, element);
-          }
-        },
-        axis: {
-          x: {
-            label: {
-              // X 軸のラベルを変更する
-              // 位置も変えれる
-              text: "年",
-              position: "outer-center"
-            },
-            type: "category",
-            categories: this.xTicks
-          },
-          y: {
-            label: {
-              text: "人口数",
-              position: "outer-middle"
-            }
-          }
-        },
-        // tooltip: {
-        //   // 各点にマウスオーバーした際に出てくる部分の設定
-        //   format: {
-        //     title(d) {
-        //       return `第 ${d} 期`;
-        //     },
-        //     value(value, ratio, id) {
-        //       return `${value} 億円`;
-        //     }
-        //   }
-        // },
-        grid: {
-          x: {
-            show: true
-          },
-          y: {
-            show: true
-          }
-        },
-        legend: {
-          position: "right"
-        }
-      };
-    }
+    // 親から渡されたデータから売上を計算する
+    // calcSales: () => {
+    //   console.log(this);
+    //   let result = 0;
+    //   // if (!this.parsedData) {
+    //   //   return result;
+    //   // }
+    //   // for (let i = 0; i < this.parsedData.length; i++) {
+    //   //   const obj = this.parsedData[i];
+    //   //   result += parseFloat(obj.Quantity) * parseFloat(obj.UnitPrice);
+    //   // }
+    //   return result;
+    // }
   },
   mounted() {
     // DOMが全部作られてからコールされる
@@ -104,6 +53,22 @@ export default {
     // 親から渡された値が更新されたときに呼び出される
     emphasizeDataName: function(newVal) {
       this.handler.$emit("dispatch", chart => chart.focus(newVal));
+    },
+    parsedData: {
+      immediate: true,
+      handler: function() {
+        let result = 0;
+        if (!this.parsedData) {
+          return;
+        }
+        // TODO 計算に時間がかかりすぎる
+        for (let i = 0; i < this.parsedData.length; i++) {
+          // const obj = this.parsedData[i];
+          // result += parseFloat(obj.Quantity) * parseFloat(obj.UnitPrice);
+          // console.log("in");
+        }
+        this.sales = result;
+      }
     }
   }
 };
@@ -119,6 +84,12 @@ export default {
 .cell {
   border: solid 1px #ddd;
   display: flex;
-  text-align: center;
+  align-items: center;
+  justify-content: center;
+  font-size: 2vh;
+}
+
+.header {
+  background-color: lightgray;
 }
 </style>

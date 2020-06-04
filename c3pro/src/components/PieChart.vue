@@ -25,7 +25,7 @@ export default {
   data: () => ({
     handler: new Vue()
   }),
-  props: ["chartType", "chartData", "emphasizeDataName", "xTicks"],
+  props: ["countryBuyData", "countryData"],
   computed: {
     // c3 のオプションに渡す値
     // ここでC3特有の値を渡す
@@ -35,17 +35,13 @@ export default {
         data: {
           // 円グラフ
           type: "pie",
-          // columns: this.chartData,
-          columns: [
-            // 配列一つ目が、データの名前になる
-            ["日本", 0, 20, 10, 40, 15, 250],
-            ["アメリカ", 30, 200, 100, 400, 150, 250]
-          ]
-        },
-        pie: {
-          label: {
-            show: false
+          json: [this.countryBuyData],
+          keys: {
+            value: this.countryData
           }
+        },
+        legend: {
+          show: false
         }
       };
     }

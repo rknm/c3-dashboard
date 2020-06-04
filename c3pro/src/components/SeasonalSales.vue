@@ -24,7 +24,7 @@ export default {
   data: () => ({
     handler: new Vue()
   }),
-  //props: ["chartType", "chartData", "emphasizeDataName", "xTicks"],
+  props: ["parsedData"],
   computed: {
     // c3 のオプションに渡す値
     // ここでC3特有の値を渡す
@@ -32,49 +32,29 @@ export default {
       return {
         // 主としてデータ
         data: {
+          json: this.parsedData,
+          keys: {
+            x: "InvoiceDate",
+            value: ["totalQuantity", "totalUnitPrice"]
+          },
           // x軸に表示するデータを指定
           // columns内の配列を指定する
-          x: "x",
-          // 棒グラフと線グラフ
+          // x: "x",
+          // // 棒グラフと線グラフ
           types: {
-            data1: "bar",
-            data2: "line"
+            totalUnitPrice: "bar",
+            totalQuantity: "line"
           },
-          // データ名を設定
-          names: {
-            data1: "売上",
-            data2: "オーダー数"
-          },
-          // 画面左と右のY軸名を設定
+          // // データ名を設定
+          // names: {
+          //   data1: "売上",
+          //   data2: "オーダー数"
+          // },
+          // // 画面左と右のY軸名を設定
           axes: {
-            data1: "y",
-            data2: "y2"
+            totalUnitPrice: "y",
+            totalQuantity: "y2"
           },
-          //columns: this.chartData,
-          columns: [
-            // 配列一つ目がdata.xで指定した値と一致しているため
-            // 2つめ以降の値がx軸で表示される
-            // TODO 年月の配列を作る必要あり
-            [
-              "x",
-              "2010-12-01",
-              "2011-1-01",
-              "2011-2-01",
-              "2011-3-01",
-              "2011-4-01",
-              "2011-5-01",
-              "2011-6-01",
-              "2011-7-01",
-              "2011-8-01",
-              "2011-9-01",
-              "2011-10-01",
-              "2011-11-01",
-              "2011-12-01"
-            ],
-            // TODO ここから下のデータは月ごとの売り上げとオーダー数に分ける
-            ["data1", 30, 200, 100, 400, 150, 250],
-            ["data2", 50, 300, 200, 500, 250, 350]
-          ],
           onclick: (d, element) => {
             this.onPlotClick(d, element);
           }

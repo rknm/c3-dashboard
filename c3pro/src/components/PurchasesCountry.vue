@@ -1,9 +1,9 @@
 <template>
   <div class="container">
-    <!-- TODO 親からもらったデータを渡す -->
-    <pie></pie>
-    <pie></pie>
-    <pie></pie>
+    <div v-for="(data, index) in parsedData" :key="index">
+      <div class="date">{{getYearAndMonth(data.InvoiceDate)}}</div>
+      <pie v-bind:country-buy-data="data.countryBuyData" v-bind:country-data="data.countryData"></pie>
+    </div>
   </div>
 </template>
 
@@ -27,7 +27,7 @@ export default {
   data: () => ({
     handler: new Vue()
   }),
-  props: ["chartType", "chartData", "emphasizeDataName", "xTicks"],
+  props: ["parsedData"],
   computed: {},
   mounted() {
     // DOMが全部作られてからコールされる
@@ -38,6 +38,9 @@ export default {
     onPlotClick: function(d) {
       // 選択されたプロットのデータ名を親へ通知する
       this.$emit("emphasize", d.name);
+    },
+    getYearAndMonth: function(date) {
+      return date.getFullYear() + "年" + (date.getMonth() + 1) + "月";
     }
   },
   watch: {
@@ -52,6 +55,12 @@ export default {
 .container {
   display: grid;
   grid-auto-rows: 400px;
-  grid-template-columns: repeat(auto-fill, 200px);
+  grid-template-columns: repeat(auto-fit, 200px);
+  justify-content: center; /* グリッド全体を中央に寄せる設定 */
+}
+
+.date {
+  text-align: center;
+  border-bottom: solid lightgray;
 }
 </style>
