@@ -30,27 +30,25 @@ export default {
     // ここでC3特有の値を渡す
     options() {
       return {
-        // 主としてデータ
+        // データのフォーマットを指定する
         data: {
           // 散布図
-          // 1つのグラフに複数表示する
-          types: {
-            data1: "scatter",
-            data2: "scatter"
-          },
-          // データ名を設定
-          names: {
-            data1: "a",
-            data2: "b"
-          },
-          //columns: this.chartData,
-          columns: [
-            // 配列一つ目が、データの名前になる
-            ["data1", 0, 20, 10, 40, 15, 100],
-            ["data2", 30, 200, 100, 400, 150, 250]
-          ]
+          type: "scatter",
+          // 対象データの型を指定する
+          json: this.parsedData,
+          // x軸とy軸のデータ名を指定する
+          keys: {
+            x: "unitPrice",
+            value: ["sales"]
+          }
         },
         axis: {
+          x: {
+            tick: {
+              // x軸のメモリ表示数を7個に固定する
+              count: 7
+            }
+          },
           y: {
             label: {
               text: "売上",

@@ -7,8 +7,8 @@
       <sales v-bind:parsed-data="parsedData"></sales>
       <season v-bind:parsed-data="monthData"></season>
       <country v-bind:parsed-data="monthData"></country>
-      <prices v-bind:parsed-data="parsedData"></prices>
-      <sold-and-sales v-bind:parsed-data="parsedData"></sold-and-sales>
+      <prices v-bind:parsed-data="priceAndSalses"></prices>
+      <sold-and-sales v-bind:parsed-data="itemSoldAndSales"></sold-and-sales>
       <transition v-bind:parsed-data="parsedData"></transition>
     </div>
   </div>
@@ -45,16 +45,22 @@ export default {
   data: () => ({
     emphasizeDataName: "",
     parsedData: [],
-    monthData: [],
     countryBuyData: [],
-    yearsData: {}
+    tempMonthData: {},
+    monthData: [],
+    priceAndSalses: [],
+    tempItemSoldAndSales: {},
+    itemSoldAndSales: []
   }),
   mounted() {
     // データをサーバから取得する
-    fetch("http://127.0.0.1:8081/Online_Retail_clipping.csv")
+    fetch("http://127.0.0.1:8080/Online_Retail_clipping.csv")
       .then(res => res.text())
       .then(data => {
         this.parse(this, data);
+      })
+      .catch(() => {
+        alert("読み込みに失敗しました");
       });
   },
   methods: {
@@ -85,12 +91,20 @@ export default {
           ) {
             // 季節ごとの売上変化用と国ごとの売上データを作成
             obj.createSeasonDate(obj, row);
+
+            // 単価と売上用のデータを作成する
+            // [{unitPrice: 価格, sales: 数量*価格}, ...]
+            obj.createPriceAndSalesData(obj, row);
+
+            // 商品ごとの販売数および売上のデータを作成する
+            // [{item: 商品名, sold: 総数量(Quantity*n), sales: 総売上(総数量*価格)}, ...]
+            obj.createItemSoldAndSales(obj, row);
           }
         },
         complete: function() {
           console.log("complete");
           // 生成したオブジェクトをグラフ向けのデータに加工する
-          for (let [key, value] of Object.entries(obj.yearsData)) {
+          for (let [key, value] of Object.entries(obj.tempMonthData)) {
             // グラフで日付を扱えるようにDate型に変換する
             value["InvoiceDate"] = new Date(key);
             obj.monthData.push(value);
@@ -103,40 +117,113 @@ export default {
             }
             value["countryData"] = countryData;
           }
+
+          let i = 0;
+          // 一時データを正規データに整形する
+          for (let [key, value] of Object.entries(obj.tempItemSoldAndSales)) {
+            // TODO 一時的に5件までしか表示しない
+            // TODO 多数のデータをうまく表示する方法を調べる
+            if (5 < i) {
+              return;
+            }
+
+            obj.itemSoldAndSales.push({
+              itemName: key,
+              totalQuantity: value.totalQuantity,
+              totalSales: Number.parseFloat(value.totalSales.toFixed(1))
+            });
+
+            i++;
+          }
         }
       });
     },
     createSeasonDate(obj, row) {
       const date = new Date(row.data.InvoiceDate);
       const yearAndMonth = date.getFullYear() + "-" + (date.getMonth() + 1);
-      if (!Object.prototype.hasOwnProperty.call(obj.yearsData, yearAndMonth)) {
-        obj.yearsData[yearAndMonth] = {
+      if (
+        !Object.prototype.hasOwnProperty.call(obj.tempMonthData, yearAndMonth)
+      ) {
+        obj.tempMonthData[yearAndMonth] = {
           totalUnitPrice: 0,
           totalQuantity: 0
         };
       }
       // c3js側で計算できるように数値に変換
-      obj.yearsData[yearAndMonth].totalUnitPrice += Number.parseFloat(
+      obj.tempMonthData[yearAndMonth].totalUnitPrice += Number.parseFloat(
         row.data.UnitPrice
       );
-      obj.yearsData[yearAndMonth].totalQuantity += Number.parseFloat(
+      obj.tempMonthData[yearAndMonth].totalQuantity += Number.parseFloat(
         row.data.Quantity
       );
 
       // 国ごとの売上個数データを作成
       if (
         !Object.prototype.hasOwnProperty.call(
-          obj.yearsData[yearAndMonth],
+          obj.tempMonthData[yearAndMonth],
           "countryBuyData"
         )
       ) {
-        obj.yearsData[yearAndMonth]["countryBuyData"] = {};
+        obj.tempMonthData[yearAndMonth]["countryBuyData"] = {};
       }
 
       const buyData =
-        obj.yearsData[yearAndMonth].countryBuyData[row.data.Country] || 0;
-      obj.yearsData[yearAndMonth].countryBuyData[row.data.Country] =
+        obj.tempMonthData[yearAndMonth].countryBuyData[row.data.Country] || 0;
+      obj.tempMonthData[yearAndMonth].countryBuyData[row.data.Country] =
         buyData + Number.parseFloat(row.data.Quantity);
+    },
+
+    // 単価と売上用のデータを作成する
+    // [{unitPrice: 価格, sales: 数量*価格}, ...]
+    createPriceAndSalesData(obj, row) {
+      // TODO 一時的に1000件まで表示する
+      // 多数データを散布図表示する方法を検討
+      if (obj.priceAndSalses.length < 1000) {
+        // 個数が1以上のデータのみを対象とする
+        if (0 < row.data.Quantity) {
+          obj.priceAndSalses.push({
+            // 単価を保持する
+            unitPrice: Number.parseFloat(row.data.UnitPrice),
+            // 売上(個数*単価)を保持する
+            sales: (
+              Number.parseFloat(row.data.Quantity) *
+              Number.parseFloat(row.data.UnitPrice)
+            ).toFixed(1)
+          });
+        }
+      }
+    },
+
+    // 商品ごとの販売数および売上のデータを作成する
+    // [{item: 商品名, sold: 総数量(Quantity*n), sales: 総売上(総数量*価格)}, ...]
+    createItemSoldAndSales(obj, row) {
+      // 売上個数が0以下のものは対象外とする
+      if (row.data.Quantity <= 0) {
+        return;
+      }
+
+      const itemName = row.data.Description;
+      // 一時データのkeyに商品名があるかをチェックする
+      if (
+        !Object.prototype.hasOwnProperty.call(
+          obj.tempItemSoldAndSales,
+          itemName
+        )
+      ) {
+        // 商品名のkeyがない場合は新規にkeyを追加する
+        obj.tempItemSoldAndSales[itemName] = {
+          totalQuantity: 0,
+          totalSales: 0
+        };
+      }
+
+      // 商品の総売り上げと総販売戸数を計算する
+      obj.tempItemSoldAndSales[itemName].totalQuantity += Number.parseFloat(
+        row.data.Quantity
+      );
+      obj.tempItemSoldAndSales[itemName].totalSales += Number.parseFloat(
+        row.data.UnitPrice * row.data.Quantity
+      );
     }
   }
 };

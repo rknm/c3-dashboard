@@ -1,9 +1,6 @@
 <template>
-  <div class="table-container">
-    <div class="cell">1</div>
-    <div class="cell">2</div>
-    <div class="cell">3</div>
-    <div class="cell">4</div>
+  <div>
+    <vue-c3 :handler="handler"></vue-c3>
   </div>
 </template>
 
@@ -11,57 +8,48 @@
 // hander のために必要
 import Vue from "vue";
 
+// メインのコンポーネント
+import VueC3 from "vue-c3";
+
 // CSS を読み込む
 import "c3/c3.min.css";
 
 // 国ごとの販売数及び売り上げ
 export default {
   name: "SoldAndSales",
+  components: {
+    VueC3
+  },
   // htmlがコンポーネントが参照するプロパティ
   data: () => ({
     handler: new Vue()
   }),
-  props: ["chartType", "chartData", "emphasizeDataName", "xTicks"],
+  props: ["parsedData"],
   computed: {
     // c3 のオプションに渡す値
     // ここでC3特有の値を渡す
     options() {
       return {
-        // 主としてデータ
+        // データのフォーマットを指定する
         data: {
           // 棒グラフ
           type: "bar",
-          columns: this.chartData,
-          // columns: [
-          //   // 配列一つ目が、データの名前になる
-          //   ["x", 0, 20, 10, 40, 15, this.val],
-          //   ["y", 30, 200, 100, 400, 150, 250]
-          // ]
-          // selection: {
-          //   enabled: true
-          // },
-          onclick: (d, element) => {
-            // console.log(d);
-            // console.log(element);
-            this.onPlotClick(d, element);
+          // 対象データの型を指定する
+          json: this.parsedData,
+          // x軸とy軸のデータ名を指定する
+          keys: {
+            x: "itemName",
+            value: ["totalSales", "totalQuantity"]
           }
         },
         axis: {
+          rotated: true,
           x: {
             label: {
-              // X 軸のラベルを変更する
-              // 位置も変えれる
-              text: "年",
-              position: "outer-center"
-            },
-            type: "category",
-            categories: this.xTicks
-          },
-          y: {
-            label: {
-              text: "人口数",
+              text: "商品名",
               position: "outer-middle"
-            }
+            },
+            type: "category"
           }
         },
         // tooltip: {
